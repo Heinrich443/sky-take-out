@@ -7,8 +7,16 @@
 
     <insert id="insertBatch">
         insert into dish_flavor (dish_id, name, value) values
+       <!--注意collection与形参列表的形参名一致-->
        <foreach collection="flavors" item="flavor" separator=",">
            (#{flavor.dishId}, #{flavor.name}, #{flavor.value})
        </foreach>
     </insert>
+
+    <delete id="deleteBatch">
+        delete from dish_flavor where dish_id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>
