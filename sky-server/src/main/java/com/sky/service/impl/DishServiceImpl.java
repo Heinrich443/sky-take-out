@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -104,5 +105,48 @@ public class DishServiceImpl implements DishService {
 
         // 删除菜品关联的口味数据
         dishFlavorMapper.deleteBatch(ids);
+    }
+
+    /**
+     * 根据id查询菜品和口味数据
+     * @param id
+     * @return
+     */
+    @Override
+    public DishVO getByIdWithFlavor(Long id) {
+        // 查询菜品数据
+        Dish dish = dishMapper.getById(id);
+        // 根据dishId查询口味数据
+        List<DishFlavor> flavors = dishFlavorMapper.getByDishId(id);
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        dishVO.setFlavors(flavors);
+        return dishVO;
+    }
+
+    /**
+     * 根据id修改菜品的基本信息和对应的口味信息
+     * @param dishDTO
+     */
+    @Transactional
+    @Override
+    public void update(DishDTO dishDTO) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+        // 修改菜品表基本信息
+        dishMapper.update(dish);
+
+
+        // 删除口味表原有数据
+        List<Long> dishId = new ArrayList<>();
+        dishId.add(dishDTO.getId());
+        dishFlavorMapper.deleteBatch(dishId);
+        // 将新数据插入口味表
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        if (flavors == null || flavors.isEmpty()) {
+            return;
+        }
+        flavors.forEach(flavor -> flavor.setDishId(dishDTO.getId()));
+        dishFlavorMapper.insertBatch(flavors);
     }
 }
