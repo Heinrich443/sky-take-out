@@ -22,16 +22,43 @@ public interface SetmealMapper {
     @Select("select count(id) from setmeal where category_id = #{categoryId}")
     Integer countByCategoryId(Long id);
 
+    /**
+     * 新增套餐
+     * @param setmeal
+     */
     @AutoFill(OperationType.INSERT)
     void insert(Setmeal setmeal);
 
+    /**
+     * 分页查询套餐
+     * @param setmealPageQueryDTO
+     * @return
+     */
     Page<SetmealVO> page(SetmealPageQueryDTO setmealPageQueryDTO);
 
+    /**
+     * 根据套餐id批量查询套餐
+     * @param ids
+     * @return
+     */
     List<Setmeal> getBatch(List<Long> ids);
 
+    /**
+     * 根据套餐id批量删除套餐
+     * @param ids
+     */
     void deleteBatch(List<Long> ids);
 
+    /**
+     * 根据套餐id查询套餐
+      * @param id
+     * @return
+     */
     Setmeal getById(Long id);
 
+    /**
+     * 修改套餐信息
+     * @param setmeal
+     */
     void update(Setmeal setmeal);
 }
