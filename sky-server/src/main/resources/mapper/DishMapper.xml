@@ -12,4 +12,21 @@
         (#{name}, #{categoryId}, #{price}, #{image}, #{description},
          #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser});
     </insert>
+
+    <!--注意两个表有相同字段名要加 表名. 区分，否则会出错-->
+    <select id="queryPage" resultType="com.sky.vo.DishVO">
+        select d.*, c.name as category_name from dish d join category c on d.category_id = c.id
+        <where>
+            <if test="name != null">
+                and d.name like concat('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                and d.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                and d.status = #{status}
+            </if>
+        </where>
+        order by d.create_time desc
+    </select>
 </mapper>
