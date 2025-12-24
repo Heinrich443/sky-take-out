@@ -9,6 +9,8 @@ import com.sky.vo.SetmealVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface SetmealMapper {
 
@@ -24,4 +26,8 @@ public interface SetmealMapper {
     void insert(Setmeal setmeal);
 
     Page<SetmealVO> page(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    List<Setmeal> getBatch(List<Long> ids);
+
+    void deleteBatch(List<Long> ids);
 }
