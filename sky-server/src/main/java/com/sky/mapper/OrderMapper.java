@@ -6,6 +6,7 @@ import com.sky.entity.Orders;
 import com.sky.vo.OrderVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -24,4 +25,12 @@ public interface OrderMapper {
      * @return
      */
     Page<OrderVO> list(Orders orders);
+
+    /**
+     * 根据订单id查询订单基本信息
+     * @param id
+     * @return
+     */
+    @Select("select * from orders where id = #{id}")
+    OrderVO getById(Long id);
 }
