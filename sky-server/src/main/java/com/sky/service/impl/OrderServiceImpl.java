@@ -1,7 +1,10 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
@@ -12,8 +15,10 @@ import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,5 +100,39 @@ public class OrderServiceImpl implements OrderService {
         orderSubmitVO.setOrderNumber(order.getNumber());
 
         return orderSubmitVO;
+    }
+
+    /**
+     * 查询历史订单
+     * @param page
+     * @param pageSize
+     * @param status
+     * @return
+     */
+    @Override
+    public PageResult history(String page, String pageSize, String status) {
+        // 开启分页
+        PageHelper.startPage(Integer.parseInt(page), Integer.parseInt(pageSize));
+
+        // 获取订单基本信息 List<OrdersDto>
+        Orders orders = new Orders();
+        orders.setUserId(BaseContext.getCurrentId());
+        if (status != null && !status.isEmpty()) {
+            orders.setStatus(Integer.parseInt(status));
+        }
+        Page<OrderVO> orderVOPage = orderMapper.list(orders);
+        List<OrderVO> list = orderVOPage.getResult();
+
+        for (OrderVO orderVO : list) {
+            // 获取订单详细菜品信息 List<OrdersDetail>
+            List<OrderDetail> details = orderDetailMapper.getByOrderId(orderVO.getId());
+            orderVO.setOrderDetailList(details);
+        }
+
+        // 返回
+        PageResult pageResult = new PageResult();
+        pageResult.setTotal(orderVOPage.getTotal());
+        pageResult.setRecords(list);
+        return pageResult;
     }
 }

@@ -15,4 +15,12 @@
                 #{cancelTime}, #{estimatedDeliveryTime}, #{deliveryStatus}, #{deliveryTime}, #{packAmount}, #{tablewareNumber},
                 #{tablewareStatus})
     </insert>
+
+    <select id="list" resultType="com.sky.vo.OrderVO">
+        select * from orders
+        <where>
+            <if test="id != null">and id = #{id}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+    </select>
 </mapper>
