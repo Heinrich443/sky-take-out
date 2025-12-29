@@ -104,4 +104,21 @@ public class OrderController {
         orderService.cancel(id);
         return Result.success();
     }
+
+    /**
+     * 用户催单
+     * @param id
+     * @return
+     */
+    @ApiOperation("/用户催单")
+    @GetMapping("/reminder/{id}")
+    public Result reminder(@PathVariable Long id) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 2);
+        map.put("orderId", id);
+        map.put("content", "订单号：" + id);
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
+        return Result.success();
+    }
 }
