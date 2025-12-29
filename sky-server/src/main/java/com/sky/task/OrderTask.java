@@ -25,8 +25,8 @@ public class OrderTask {
      * 处理超时订单的方法
      * 每分钟触发一次
      */
-    // @Scheduled(cron = "0 * * * * ?")
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0 * * * * ?")
+    // @Scheduled(cron = "0/5 * * * * ?")
     public void processTimeOutOrder() {
         log.info("定时处理超时订单：{}", LocalDateTime.now());
 
@@ -49,8 +49,8 @@ public class OrderTask {
      * 处理一直处于派送中的订单
      * 每小时触发
      */
-    // @Scheduled(cron = "0 0 * * * ?")
-    @Scheduled(cron = "1/5 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
+    // @Scheduled(cron = "1/5 * * * * ?")
     public void processDeliveryOrder() {
         log.info("定时处理处于派送中的订单：{}", LocalDateTime.now());
         // 派送超过3小时自动确认订单状态
