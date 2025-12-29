@@ -1,10 +1,13 @@
 package com.sky.service.impl;
 
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
+import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private OrderDetailMapper orderDetailMapper;
 
     /**
      * 统计指定时间区间内的营业额数据
@@ -173,6 +179,33 @@ public class ReportServiceImpl implements ReportService {
                 .dateList(dateList)
                 .validOrderCountList(validOrderCountList)
                 .totalOrderCount(totalOrderCount).build();
+
+        return report;
+    }
+
+    /**
+     * 统计指定时间区间内销量排名Top10
+     * @param begin
+     * @param end
+     * @return
+     */
+    @Override
+    public SalesTop10ReportVO getTop10(LocalDate begin, LocalDate end) {
+        // 商品名称列表nameList
+        List<String> names = new ArrayList<>();
+        // 销量列表numberList
+        List<Integer> numbers = new ArrayList<>();
+
+        List<GoodsSalesDTO> list = orderDetailMapper.getNameAndCount(begin, end, Orders.COMPLETED);
+        for (GoodsSalesDTO goodsSalesDTO : list) {
+            names.add(goodsSalesDTO.getName());
+            numbers.add(goodsSalesDTO.getNumber());
+        }
+
+        String nameList = StringUtils.join(names, ",");
+        String numberList = StringUtils.join(numbers, ",");
+
+        SalesTop10ReportVO report = SalesTop10ReportVO.builder().nameList(nameList).numberList(numberList).build();
 
         return report;
     }

@@ -13,4 +13,18 @@
              #{detail.setmealId}, #{detail.dishFlavor}, #{detail.number}, #{detail.amount})
         </foreach>
     </insert>
+
+    <select id="getNameAndCount" resultType="com.sky.dto.GoodsSalesDTO">
+        select d.name, sum(d.number) as number
+        from order_detail d join orders o
+        on d.order_id = o.id
+        <where>
+            <if test="begin != null">and o.order_time &gt; #{begin}</if>
+            <if test="end != null">and o.order_time &lt; #{end}</if>
+            <if test="status != null">and o.status = #{status}</if>
+        </where>
+        group by d.name
+        order by number desc
+        limit 0,10;
+    </select>
 </mapper>
