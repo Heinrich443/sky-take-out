@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -66,4 +67,16 @@ public interface OrderMapper {
      * @return
      */
     Integer getCountByDate(LocalDateTime begin, LocalDateTime end, Integer status);
+
+    /**
+    *根据动态条件统计订单数量
+    * @param map
+    */
+    Integer countByMap(Map map);
+
+    /**
+     * 根据动态条件统计营业额
+     * @param map
+     */
+    Double sumByMap(Map map);
 }
