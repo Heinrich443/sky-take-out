@@ -57,4 +57,13 @@ public interface OrderMapper {
      * @return
      */
     Double getByDate(LocalDateTime begin, LocalDateTime end);
+
+    /**
+     * 统计当前日期和条件下的订单数
+     * @param begin
+     * @param end
+     * @param status
+     * @return
+     */
+    Integer getCountByDate(LocalDateTime begin, LocalDateTime end, Integer status);
 }

@@ -1,7 +1,10 @@
 package com.sky.controller.admin;
 
+import com.sky.mapper.OrderMapper;
 import com.sky.result.Result;
+import com.sky.service.OrderService;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.annotations.Api;
@@ -37,8 +40,7 @@ public class ReportController {
     @GetMapping("/turnoverStatistics")
     public Result<TurnoverReportVO> turnoverReportStatistics(
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
-            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end
-            ) {
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
         log.info("营业额数据统计：{},{}", begin, end);
         TurnoverReportVO report = reportService.getTurnoverStatistics(begin, end);
         return Result.success(report);
@@ -57,6 +59,22 @@ public class ReportController {
             @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
         log.info("用户统计：{},{}", begin, end);
         UserReportVO report = reportService.getUserStatistics(begin, end);
+        return Result.success(report);
+    }
+
+    /**
+     * 订单统计
+     * @param begin
+     * @param end
+     * @return
+     */
+    @ApiOperation("订单统计")
+    @GetMapping("/ordersStatistics")
+    public Result<OrderReportVO> orderStatistics(
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+        log.info("订单统计：{},{}", begin, end);
+        OrderReportVO report = reportService.getOrderStatistics(begin, end);
         return Result.success(report);
     }
 }
