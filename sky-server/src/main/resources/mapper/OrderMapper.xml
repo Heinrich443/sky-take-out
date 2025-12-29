@@ -35,4 +35,7 @@
         where id = #{id}
     </update>
 
+    <select id="getByDate" resultType="java.lang.Double">
+        select sum(amount) from orders where order_time > #{begin} and order_time &lt; #{end} and status = 5
+    </select>
 </mapper>
