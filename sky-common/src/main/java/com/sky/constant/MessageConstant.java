@@ -25,4 +25,5 @@ public class MessageConstant {
     public static final String ORDER_STATUS_ERROR = "订单状态错误";
     public static final String ORDER_NOT_FOUND = "订单不存在";
     public static final String CANCEL_BY_USER = "用户取消订单";
+    public static final String CANCEL_BY_TASK = "订单超时，自动取消";
 }
