@@ -3,6 +3,7 @@ package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersDTO;
 import com.sky.dto.OrdersSubmitDTO;
@@ -143,9 +144,40 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public OrderVO detail(Long id) {
-        OrderVO orderVO = orderMapper.getById(id);
+        Orders orders = orderMapper.getById(id);
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
         List<OrderDetail> details = orderDetailMapper.getByOrderId(id);
         orderVO.setOrderDetailList(details);
         return orderVO;
+    }
+
+    /**
+     * 取消订单
+     * @param id
+     */
+    @Override
+    public void cancel(Long id) {
+        Orders order = orderMapper.getById(id);
+
+        if (order == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        if (order.getStatus() > 2) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        if (order.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            // 退款操作
+            order.setPayStatus(Orders.REFUND);
+        }
+
+        order.setStatus(Orders.CANCELLED);
+        order.setId(id);
+        order.setCancelReason(MessageConstant.CANCEL_BY_USER);
+        order.setCancelTime(LocalDateTime.now());
+
+        orderMapper.update(order);
     }
 }

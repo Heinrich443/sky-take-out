@@ -32,5 +32,11 @@ public interface OrderMapper {
      * @return
      */
     @Select("select * from orders where id = #{id}")
-    OrderVO getById(Long id);
+    Orders getById(Long id);
+
+    /**
+     * 修改订单信息
+     * @param order
+     */
+    void update(Orders order);
 }
