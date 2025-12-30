@@ -7,6 +7,7 @@ import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersDTO;
 import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
@@ -18,6 +19,7 @@ import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
+import com.sky.service.ShoppingCartService;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
@@ -43,6 +45,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ShoppingCartMapper shoppingCartMapper;
+
+    @Autowired
+    private ShoppingCartService shoppingCartService;
 
     /**
      * 用户下单
@@ -179,5 +184,25 @@ public class OrderServiceImpl implements OrderService {
         order.setCancelTime(LocalDateTime.now());
 
         orderMapper.update(order);
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    @Override
+    public void repetition(Long id) {
+        // 根据订单id查询订单详情
+        List<OrderDetail> details = orderDetailMapper.getByOrderId(id);
+        if (details == null || details.isEmpty()) {
+            return;
+        }
+
+        // 将菜品加入购物车
+        for (OrderDetail detail : details) {
+            ShoppingCartDTO shoppingCartDTO = new ShoppingCartDTO();
+            BeanUtils.copyProperties(detail, shoppingCartDTO);
+            shoppingCartService.addShoppingCart(shoppingCartDTO);
+        }
     }
 }

@@ -121,4 +121,16 @@ public class OrderController {
         webSocketServer.sendToAllClient(json);
         return Result.success();
     }
+
+    /**
+     * 再来一单
+     * @return
+     */
+    @ApiOperation("再来一单")
+    @PostMapping("/repetition/{id}")
+    public Result repetition(@PathVariable Long id) {
+        log.info("再来一单：{}", id);
+        orderService.repetition(id);
+        return Result.success();
+    }
 }
