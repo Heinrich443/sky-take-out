@@ -21,6 +21,7 @@ import com.sky.mapper.ShoppingCartMapper;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.service.ShoppingCartService;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.apache.commons.lang3.StringUtils;
@@ -237,6 +238,15 @@ public class OrderServiceImpl implements OrderService {
         pageResult.setRecords(result);
 
         return pageResult;
+    }
+
+    @Override
+    public OrderStatisticsVO orderStatistics() {
+        OrderStatisticsVO statistics = new OrderStatisticsVO();
+        statistics.setToBeConfirmed(orderMapper.getCountByDate(null, null, Orders.TO_BE_CONFIRMED));
+        statistics.setConfirmed(orderMapper.getCountByDate(null, null, Orders.CONFIRMED));
+        statistics.setDeliveryInProgress(orderMapper.getCountByDate(null, null, Orders.DELIVERY_IN_PROGRESS));
+        return statistics;
     }
 
     private String getOrderDishes(List<OrderDetail> details) {
