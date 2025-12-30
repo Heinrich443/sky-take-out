@@ -6,6 +6,7 @@ import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersDTO;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.AddressBook;
@@ -22,6 +23,7 @@ import com.sky.service.OrderService;
 import com.sky.service.ShoppingCartService;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,6 +85,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(Orders.PENDING_PAYMENT);
         order.setPhone(address.getPhone());
         order.setNumber(String.valueOf(System.currentTimeMillis()));
+        order.setAddress(address.getProvinceName() + address.getCityName() + address.getDistrictName() + address.getDetail());
         orderMapper.insert(order);
 
         // 向订单明细表中插入n条数据
@@ -126,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
         if (status != null && !status.isEmpty()) {
             orders.setStatus(Integer.parseInt(status));
         }
-        Page<OrderVO> orderVOPage = orderMapper.list(orders);
+        Page<OrderVO> orderVOPage = orderMapper.list(orders, null, null);
         List<OrderVO> list = orderVOPage.getResult();
 
         for (OrderVO orderVO : list) {
@@ -204,5 +207,48 @@ public class OrderServiceImpl implements OrderService {
             BeanUtils.copyProperties(detail, shoppingCartDTO);
             shoppingCartService.addShoppingCart(shoppingCartDTO);
         }
+    }
+
+    /**
+     * 订单搜索
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult search(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        // 先查询订单基本信息
+        Orders orders = new Orders();
+        orders.setNumber(ordersPageQueryDTO.getNumber());
+        orders.setPhone(ordersPageQueryDTO.getPhone());
+        orders.setStatus(ordersPageQueryDTO.getStatus());
+        Page<OrderVO> page = orderMapper.list(orders, ordersPageQueryDTO.getBeginTime(), ordersPageQueryDTO.getEndTime());
+        // 再查询订单详细信息
+        List<OrderVO> result = page.getResult();
+        for (OrderVO orderVO : result) {
+            List<OrderDetail> details = orderDetailMapper.getByOrderId(orderVO.getId());
+            // 将订单详细信息拼成字符串
+            String orderDishes = getOrderDishes(details);
+            orderVO.setOrderDishes(orderDishes);
+        }
+
+        PageResult pageResult = new PageResult();
+        pageResult.setTotal(page.getTotal());
+        pageResult.setRecords(result);
+
+        return pageResult;
+    }
+
+    private String getOrderDishes(List<OrderDetail> details) {
+        if (details == null || details.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder orderDishes = new StringBuilder();
+        for (OrderDetail detail : details) {
+            orderDishes.append(detail.getName()).append("*").append(detail.getNumber()).append(";");
+        }
+
+        return orderDishes.toString();
     }
 }

@@ -27,7 +27,7 @@ public interface OrderMapper {
      * @param orders
      * @return
      */
-    Page<OrderVO> list(Orders orders);
+    Page<OrderVO> list(Orders orders, LocalDateTime beginTime, LocalDateTime endTime);
 
     /**
      * 根据订单id查询订单基本信息

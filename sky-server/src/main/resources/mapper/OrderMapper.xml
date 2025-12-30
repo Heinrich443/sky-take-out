@@ -19,8 +19,12 @@
     <select id="list" resultType="com.sky.vo.OrderVO">
         select * from orders
         <where>
-            <if test="id != null">and id = #{id}</if>
-            <if test="status != null">and status = #{status}</if>
+            <if test="orders.id != null">and id = #{orders.id}</if>
+            <if test="orders.status != null">and status = #{orders.status}</if>
+            <if test="orders.number != null">and number = #{orders.number}</if>
+            <if test="orders.phone != null">and phone = #{orders.phone}</if>
+            <if test="beginTime != null">and order_time &gt; #{beginTime}</if>
+            <if test="endTime != null">and order_time &lt; #{endTime}</if>
         </where>
         order by order_time desc
     </select>
