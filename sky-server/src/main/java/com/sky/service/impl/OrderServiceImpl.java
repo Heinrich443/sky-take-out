@@ -5,10 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersDTO;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersSubmitDTO;
-import com.sky.dto.ShoppingCartDTO;
+import com.sky.dto.*;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
@@ -240,6 +237,10 @@ public class OrderServiceImpl implements OrderService {
         return pageResult;
     }
 
+    /**
+     * 各个状态的订单数量统计
+     * @return
+     */
     @Override
     public OrderStatisticsVO orderStatistics() {
         OrderStatisticsVO statistics = new OrderStatisticsVO();
@@ -247,6 +248,96 @@ public class OrderServiceImpl implements OrderService {
         statistics.setConfirmed(orderMapper.getCountByDate(null, null, Orders.CONFIRMED));
         statistics.setDeliveryInProgress(orderMapper.getCountByDate(null, null, Orders.DELIVERY_IN_PROGRESS));
         return statistics;
+    }
+
+    /**
+     * 改变订单状态
+     * @param id
+     * @param status
+     */
+    @Override
+    public void updateStatus(Long id, Integer status) {
+        Orders order = orderMapper.getById(id);
+        if (order == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        if (status.equals(Orders.DELIVERY_IN_PROGRESS)) {
+            if (!order.getStatus().equals(Orders.CONFIRMED)) {
+                throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+            }
+        }
+
+        if (status.equals(Orders.CONFIRMED)) {
+            if (!order.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+                throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+            }
+            order.setDeliveryTime(LocalDateTime.now());
+        }
+
+        if (status.equals(Orders.COMPLETED)) {
+            if (!order.getStatus().equals(Orders.DELIVERY_IN_PROGRESS)) {
+                throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+            }
+        }
+
+        order.setStatus(status);
+        orderMapper.update(order);
+    }
+
+    /**
+     * 拒单
+     * @param ordersRejectionDTO
+     */
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+        // 查询订单
+        Orders order = orderMapper.getById(ordersRejectionDTO.getId());
+        // 订单状态为待接单才能拒单
+        if (order == null || !order.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        // 支付状态为已支付，退款
+        if (order.getPayStatus().equals(Orders.PAID)) {
+            // 退款
+        }
+
+        // 将status改为已取消
+        order.setStatus(Orders.CANCELLED);
+        // 添加订单拒绝原因
+        order.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+        // 添加订单取消时间
+        order.setCancelTime(LocalDateTime.now());
+        // 更新数据库
+        orderMapper.update(order);
+    }
+
+    /**
+     * 取消订单
+     * @param ordersCancelDTO
+     */
+    @Override
+    public void cancelOrder(OrdersCancelDTO ordersCancelDTO) {
+        // 查询订单
+        Orders order = orderMapper.getById(ordersCancelDTO.getId());
+        // 订单状态为待接单才能取消
+        if (order == null || order.getStatus() >= Orders.DELIVERY_IN_PROGRESS) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        if (order.getPayStatus().equals(Orders.PAID)) {
+            // 退款
+        }
+
+        // 将status改为已取消
+        order.setStatus(Orders.CANCELLED);
+        // 添加订单取消原因
+        order.setCancelReason(ordersCancelDTO.getCancelReason());
+        // 添加订单取消时间
+        order.setCancelTime(LocalDateTime.now());
+        // 更新数据库
+        orderMapper.update(order);
     }
 
     private String getOrderDishes(List<OrderDetail> details) {
